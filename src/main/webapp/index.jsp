@@ -22,13 +22,13 @@
 			<tr height="10">
 				<td width="40%"></td>
 				<td width="10%">用户名：</td>
-				<td><input type="text" value="${staff.staffName }" name="staffName" id="staffName"/></td>
+				<td><input type="text" placeholder="请使用portal账号登录" value="${staff.staffName }" name="staffName" id="staffName"/></td>
 				<td width="30%"></td>
 			</tr>
 			<tr height="10">
 				<td width="40%"></td>
 				<td width="10%">密  码：</td>
-				<td><input type="password" value="${staff.password }" name="password" id="password"/></td>
+				<td><input type="password" placeholder="请输入portal账号密码" value="${staff.password }" name="password" id="password"/></td>
 				<td width="30%"></td>
 			</tr>
 			<tr height="10">

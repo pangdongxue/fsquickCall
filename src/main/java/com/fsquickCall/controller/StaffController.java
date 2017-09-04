@@ -2,9 +2,8 @@ package com.fsquickCall.controller;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.ResultSet;
+import java.net.MalformedURLException;
+import java.rmi.RemoteException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,20 +19,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.fsquickCall.model.Staff;
 import com.fsquickCall.model.User;
-import com.fsquickCall.service.Staffservice;
 import com.fsquickCall.service.Userservice;
 import com.fsquickCall.util.ExcelUtil;
 import com.fsquickCall.util.ResponseUtil;
 import com.fsquickCall.util.StringUtil;
 
-
+import net.gmcc.fs.nwsc.IAMSSSO.SSO_asmx.ResultOfLoginResult;
+import net.gmcc.fs.nwsc.IAMSSSO.SSO_asmx.SSOLocator;
+import net.gmcc.fs.nwsc.IAMSSSO.SSO_asmx.SSOSoapStub;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -43,30 +43,39 @@ import net.sf.json.JSONObject;
 public class StaffController {
 
 	@Autowired
-	private Staffservice staffservice;
-	
-	@Autowired
 	private Userservice userservice;
 		
-	@RequestMapping("/login")
-	public String login(Staff staff,HttpServletRequest request){
+	@RequestMapping(value = "/login", method = RequestMethod.POST)
+	public String login(Staff staff, HttpServletRequest request, HttpServletResponse response) throws RemoteException{
 		if(StringUtil.isEmpty(staff.getStaffName())||StringUtil.isEmpty(staff.getPassword())){
-			
 			request.setAttribute("errorMsg", "用户名或密码为空！");
 			return "index";
 		}
 		
-		Staff resultStaff=staffservice.login(staff);
-		if(resultStaff==null){
-			request.setAttribute("staff", staff);
-			request.setAttribute("errorMsg", "用户名或密码错误！");
+		SSOLocator Locator = null;  
+		SSOSoapStub stub = null;  
+		java.net.URL url = null;
+		Locator = new SSOLocator();  				   
+		try {
+			url = new java.net.URL(" http://nwsc.fs.gmcc.net/IAMSSSO/SSO.asmx?WSDL");
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 				   
+		
+		stub = new SSOSoapStub(url,Locator);
+		ResultOfLoginResult ssocheckRes = stub.loginCheck2("__FSMobile-ABOSS__", "ABOSS", "ABOSS123",
+		staff.getStaffName(), staff.getPassword());				
+		if (ssocheckRes.getDetail().getReturnValue() != 0) {																		
+			request.setAttribute("errorMsg", "用户名或密码错误！");					
 			return "index";
-		}else{
+		}else {
 			HttpSession session=request.getSession();
-			session.setAttribute("currentStaff", resultStaff);
-			return "redirect:/userinfo.jsp";
-		}
+			session.setAttribute("currentStaff", staff);					
+			return "userinfo";
+		}	
 	}
+
 	
 	/** 
      * 用户列表,根据当前页和记录数 
