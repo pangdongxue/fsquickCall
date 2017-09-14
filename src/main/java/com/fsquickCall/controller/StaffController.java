@@ -113,7 +113,13 @@ public class StaffController {
         userservice.addUser(user);  
     }
         
-    
+    /**
+     * 导出Excel文件
+     * @param request
+     * @param response
+     * @param user
+     * @throws Exception
+     */
     @RequestMapping("/exportExcel") 
     public void export2(HttpServletRequest request, HttpServletResponse response,User user) throws Exception{
     	Staff currentStaff = (Staff) request.getSession().getAttribute("currentStaff");
