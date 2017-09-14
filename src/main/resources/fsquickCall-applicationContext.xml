@@ -14,7 +14,7 @@
         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">    
         
 	
-	<!--  <import resource="classpath:fsquickCall-database.xml" />  -->
+	<import resource="classpath:fsquickCall-quartz.xml" />  
 	
 	<!-- 自动扫描 -->
 	<context:component-scan base-package="com.fsquickCall.service" />

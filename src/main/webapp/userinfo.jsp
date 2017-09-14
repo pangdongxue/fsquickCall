@@ -25,7 +25,7 @@
 		}
 		
 		function downloadTemplate(){
-			window.open('template/userExporTemplate.xls');
+			window.open('${pageContext.request.contextPath}/template/userExporTemplate.xls');
 		}
 		
 		function uploadFile(){
@@ -52,6 +52,10 @@
 	</script>
 </head>
 <body>
+	<div region="north" style="height: 55px;background-color: #E0EDFF">
+		<div style="padding-top: 30px;padding-right: 20px; float:right">当前用户：&nbsp;<font color="red" >${currentStaff.staffName}</font><a href="${pageContext.request.contextPath}/index.jsp" style="margin-left:20px;text-decoration:none">注销登录</a></div>
+	</div>
+
 	<table id="dg" title="用户管理" class="easyui-datagrid" 
             url="${pageContext.request.contextPath}/user/userList.do"
             toolbar="#toolbar" pagination="true"
@@ -59,10 +63,12 @@
         <thead>
             <tr>
             	<th field="id" width="50" hidden="true">编号</th>
+            	<th field="loginid" width="15" >员工账号</th>
                 <th field="name" width="15">客户姓名</th>
                 <th field="phone" width="20">电话号码</th>
-                <th field="plan" width="50">推荐套餐</th>
-                <th field="note" width="30">备注</th>
+                <th field="planid" width="20">产品id</th>
+                <th field="plan" width="30">推荐产品</th>
+                <th field="note" width="50">备注</th>
             </tr>
         </thead>
     </table>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"    
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   
+    xmlns:p="http://www.springframework.org/schema/p"  
+    xmlns:aop="http://www.springframework.org/schema/aop"   
+    xmlns:context="http://www.springframework.org/schema/context"  
+    xmlns:jee="http://www.springframework.org/schema/jee"  
+    xmlns:tx="http://www.springframework.org/schema/tx"  
+    xsi:schemaLocation="    
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd  
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd  
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd  
+        http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.0.xsd  
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd"> 
+
+	<!--excel文件解析， 每天凌晨运行 -->
+	
+	<!-- 定义目标bean和bean中的方法 -->
+	<bean id="FileQuartz" class="com.fsquickCall.quartzjob.FileQuartzJob" />
+	<bean id="FileQuartzDetail"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="FileQuartz" />
+		<property name="targetMethod" value="doFileJob" />
+		<property name="concurrent" value="false" />
+	</bean>
+	
+	<!-- ======================== 调度触发器 ======================== -->  
+	<bean id="FileQuartzTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="FileQuartzDetail" />
+		<property name="cronExpression" value="0 38 15 * * ?" />
+	</bean>
+	
+	<!-- ======================== 调度工厂 ======================== -->
+	<bean id="SpringJobSchedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">  
+    <property name="triggers">  
+        <list>  
+            <ref bean="FileQuartzTrigger"/>  
+        </list>  
+    </property>  
+</bean> 
+
+</beans>

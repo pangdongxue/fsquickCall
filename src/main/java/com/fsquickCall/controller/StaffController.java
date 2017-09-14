@@ -4,12 +4,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -27,10 +31,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fsquickCall.model.Staff;
 import com.fsquickCall.model.User;
 import com.fsquickCall.service.Userservice;
+import com.fsquickCall.util.ECOPUtils;
 import com.fsquickCall.util.ExcelUtil;
 import com.fsquickCall.util.ResponseUtil;
 import com.fsquickCall.util.StringUtil;
 
+import net.gmcc.fs.nwsc.ECOP.Result;
 import net.gmcc.fs.nwsc.IAMSSSO.SSO_asmx.ResultOfLoginResult;
 import net.gmcc.fs.nwsc.IAMSSSO.SSO_asmx.SSOLocator;
 import net.gmcc.fs.nwsc.IAMSSSO.SSO_asmx.SSOSoapStub;
@@ -41,7 +47,7 @@ import net.sf.json.JSONObject;
 @Controller
 @RequestMapping("/user")
 public class StaffController {
-
+		
 	@Autowired
 	private Userservice userservice;
 		
@@ -78,7 +84,7 @@ public class StaffController {
 
 	
 	/** 
-     * 用户列表,根据当前页和记录数 
+     * 客户列表,根据当前页和记录数 
      * @param page 当前页 
      * @param rows 页面记录数 
      * @param response  
@@ -94,64 +100,46 @@ public class StaffController {
         int end = page * rows;  
         //把总记录和当前记录写到前台  
         JSONObject result=new JSONObject();
-        int total = userservice.usersList().size();
-        System.out.print(total);
-        
-        List<User> userlist=userservice.usersListByPage(start, end);
-        
-        JSONArray jsonArray=JSONArray.fromObject(userlist);		
-         
-        System.out.print(total);
+        int total = userservice.usersList().size();            
+        List<User> userlist=userservice.usersListByPage(start, end);        
+        JSONArray jsonArray=JSONArray.fromObject(userlist);		             
         result.put("rows", jsonArray);
 		result.put("total", total);
 		ResponseUtil.write(response,result); 
     }  
     
-    
     @RequestMapping("/addUser")  
     public void addUser(HttpServletRequest request,User user){   
         userservice.addUser(user);  
     }
+        
     
     @RequestMapping("/exportExcel") 
-    public void export2(HttpServletResponse response,User user) throws Exception{
-		List<User> userlist=userservice.usersList();
-		System.out.println(userlist.get(0).getPlan());
-		Workbook wb=ExcelUtil.fillExcelDataWithTemplate(userlist, "userExporTemplate.xls");
-		ResponseUtil.export(response, wb, "匹配后的推荐方案.xls");
+    public void export2(HttpServletRequest request, HttpServletResponse response,User user) throws Exception{
+    	Staff currentStaff = (Staff) request.getSession().getAttribute("currentStaff");
+    	System.out.println("员工账号"+currentStaff.getStaffName());
+		List<User> userlist=userservice.usersList();		
+		Workbook wb=ExcelUtil.fillExcelDataWithTemplate(userlist, currentStaff, "userExporTemplate.xls");		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+		String filename = "推荐方案_" + sdf.format(new Date()).toString() + ".xls";
+		ResponseUtil.export(response, wb, filename);
     }
 	
     @RequestMapping("/uploadExcel")
 	@SuppressWarnings("resource")
-	public String upload(@RequestParam("userUploadFile") MultipartFile userUploadFile ,HttpServletRequest request,HttpServletResponse response)throws Exception{		
-    	
-    	
-    	User user = new User();
+	public String upload(@RequestParam("userUploadFile") MultipartFile userUploadFile ,HttpServletRequest request,HttpServletResponse response)throws Exception{		    	    	    	    	   
     	String filePath=request.getSession().getServletContext().getRealPath("/");
-    	File userfile = new File(filePath+"uploadfile/"+userUploadFile.getOriginalFilename());
-    	userUploadFile.transferTo(userfile);		
-		POIFSFileSystem fs=new POIFSFileSystem(new FileInputStream(filePath+"uploadfile/"+userUploadFile.getOriginalFilename()));		
-		HSSFWorkbook wb=new HSSFWorkbook(fs);
-		HSSFSheet hssfSheet=wb.getSheetAt(0);  // 获取第一个Sheet页
-		if(hssfSheet!=null){
-			for(int rowNum=1;rowNum<=hssfSheet.getLastRowNum();rowNum++){
-				HSSFRow hssfRow=hssfSheet.getRow(rowNum);
-				if(hssfRow==null){
-					continue;
-				}
-				user.setName(ExcelUtil.formatCell(hssfRow.getCell(0)));				
-				user.setPhone(ExcelUtil.formatCell(hssfRow.getCell(1)));						
-				user.setPlan(ExcelUtil.formatCell(hssfRow.getCell(2)));
-				user.setNote(ExcelUtil.formatCell(hssfRow.getCell(3)));
-				userservice.addUser(user);			
-			}
-		}
+    	int random = (int) (Math.random() * 1000);
+    	java.util.Date dt = new java.util.Date(System.currentTimeMillis());  
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");  
+        String time = sdf.format(dt);
+    	String newFileName = time + random + ".xls" ;
+    	File userfile = new File(filePath+"uploadfile/"+newFileName);
+    	userUploadFile.transferTo(userfile);				
 		JSONObject result=new JSONObject();
 		result.put("success", "true");
 		ResponseUtil.write(response, result);
-		if(userfile.exists()){
-			userfile.delete();
-		}
+		
 		return null;
 	}
 }

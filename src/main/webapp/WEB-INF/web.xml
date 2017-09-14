@@ -14,7 +14,7 @@
     <!-- Spring配置文件 -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>classpath:fsquickCall-applicationContext.xml</param-value>
+		<param-value>classpath:fsquickCall-applicationContext.xml;classpath:fsquickCall-quartz.xml</param-value>
 	</context-param>
 	<!-- 编码过滤器 -->
 	<filter>

@@ -10,24 +10,29 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+
+import com.fsquickCall.model.Staff;
 import com.fsquickCall.model.User;
 
 public class ExcelUtil {	
 	
-	public static Workbook fillExcelDataWithTemplate(List <User> userlist,String templateFileName)throws Exception{
+	public static Workbook fillExcelDataWithTemplate(List <User> userlist,Staff staff, String templateFileName)throws Exception{
 		InputStream inp=ExcelUtil.class.getResourceAsStream(templateFileName);
 		POIFSFileSystem fs=new POIFSFileSystem(inp);
 		Workbook wb=new HSSFWorkbook(fs);
 		Sheet sheet=wb.getSheetAt(0);
-		
-		//int cellNums=sheet.getRow(0).getLastCellNum();
-		int rowIndex=1;		
-		for(int i = 0 ; i < userlist.size() ; i++) {
-			Row row=sheet.createRow(rowIndex++);		
-			row.createCell(0).setCellValue(userlist.get(i).getName());
-			row.createCell(1).setCellValue(userlist.get(i).getPhone());
-			row.createCell(2).setCellValue(userlist.get(i).getPlan());
-			row.createCell(3).setCellValue(userlist.get(i).getNote());			
+		int rowIndex=1;				
+		for(int i = 0 ; i < userlist.size() ; i++) {	
+			if(userlist.get(i).getLoginid().equals(staff.getStaffName())){
+				Row row=sheet.createRow(rowIndex++);
+				row.createCell(0).setCellValue(userlist.get(i).getLoginid());
+				row.createCell(1).setCellValue(userlist.get(i).getName());
+				row.createCell(2).setCellValue(userlist.get(i).getPhone());
+				row.createCell(3).setCellValue(userlist.get(i).getPlanid());
+				row.createCell(4).setCellValue(userlist.get(i).getPlan());
+				row.createCell(5).setCellValue(userlist.get(i).getNote());
+			}
+						
 		}		
 		return wb;
 	}
@@ -44,9 +49,7 @@ public class ExcelUtil {
 				return hssfCell.getStringCellValue();
 			}else{
 				return String.valueOf(hssfCell.getStringCellValue());
-			} 
-			
-	
+			} 				
 		}
 	}
 }

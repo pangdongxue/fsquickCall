@@ -4,12 +4,20 @@ import java.io.File;
 
 import org.springframework.stereotype.Component;
 
+
+/**
+ * 上传文件数据实体
+ *
+ */
+
 @Component
 public class User {
 
 	private int id;
+	private String loginid;
 	private String name;
 	private String phone;
+	private String planid;
 	private String plan;
 	private String note;
 	
@@ -28,25 +36,47 @@ public class User {
 	public User() {
 	}
 	
-	public User(String name, String phone, String plan, String note) {
+	public User(String loginid, String name, String phone, String planid, String plan, String note) {
+		super();
+		this.loginid = loginid;
 		this.name = name;
 		this.phone = phone;
+		this.planid = planid;
 		this.plan = plan;
 		this.note = note;
 	}
-	
+
 	public int getId() {
 		return id;
 	}
 	public void setId(int id) {
 		this.id = id;
 	}
+	
+	public String getLoginid() {
+		return loginid;
+	}
+
+	public void setLoginid(String loginid) {
+		this.loginid = loginid;
+	}
+
 	public String getName() {
 		return name;
 	}
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	
+	public String getPlanid() {
+		return planid;
+	}
+
+	public void setPlanid(String planid) {
+		this.planid = planid;
+	}
+
 	public String getPlan() {
 		return plan;
 	}

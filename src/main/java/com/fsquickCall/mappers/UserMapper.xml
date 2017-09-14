@@ -7,8 +7,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	 <!-- 用户列表List -->  
     <resultMap type="com.fsquickCall.model.User" id="resultListUser">  
         <id column="id" property="id" />  
+        <result column="loginid" property="loginid" /> 
         <result column="name" property="name" />  
-        <result column="phone" property="phone" />  
+        <result column="phone" property="phone" />
+        <result column="planid" property="planid" />  
         <result column="plan" property="plan" />  
         <result column="note" property="note" />  
     </resultMap>
@@ -24,8 +26,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           
     <insert id="addUser" parameterType="User" useGeneratedKeys="true"   
         keyProperty="id">  
-        insert into t_user(name,phone,plan,note)  
-            values(#{name},#{phone},#{plan},#{note})      
+        insert into t_user(loginid,name,phone,planid,plan,note)  
+            values(#{loginid},#{name},#{phone},#{planid},#{plan},#{note})      
     </insert>  
               
 	
