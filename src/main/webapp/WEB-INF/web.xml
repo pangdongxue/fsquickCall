@@ -10,6 +10,16 @@
   <welcome-file-list>
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
+	
+  <!--设置log4j的配置文件位置-->
+	<context-param>
+    	<param-name>log4jConfigLocation</param-name>
+    	<param-value>classpath:log4j.properties</param-value>
+	</context-param>
+	<!--使用监听加载log4j的配置文件-->
+	<listener>
+    	<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+	</listener>
   
     <!-- Spring配置文件 -->
 	<context-param>
@@ -30,6 +40,17 @@
 		<filter-name>encodingFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
+	
+	<!-- 防sql注入过滤器 -->
+	<filter>
+		<filter-name>CheckSQLFilter</filter-name>
+		<filter-class>com.fsquickCall.common.CheckSQLFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>CheckSQLFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
 	<!-- Spring监听器 -->
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>

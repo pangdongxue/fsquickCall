@@ -20,6 +20,97 @@
 	<script>
 		var url;
 		
+		//打开新增用户对话框
+		function openUserAddDialog(){
+			//在勾选情况下点击新增要先清除数据
+			resetValue();
+			$("#dlg").dialog("open").dialog("setTitle","添加客户信息");
+			url="${pageContext.request.contextPath}/user/userSave.do";
+		}
+		//重置对话框内数据
+		function resetValue(){
+			$("#loginid").val("");
+			$("#name").val("");
+			$("#phone").val("");
+			$("#planid").val("");
+			$("#plan").val("");
+			$("#note").val("");
+		}
+		//关闭对话框
+		function closeUserDialog(){
+			$("#dlg").dialog("close");
+			resetValue();
+		}
+		//提交新增用户数据
+		function saveUser(){
+			$("#fm").form("submit",{
+				url:url,
+				contentType: 'application/json',
+				success:function(result){					
+					var res = eval('('+result+')');	                    
+	                if (res.success){
+	                    $.messager.alert("系统提示","保存成功");
+						resetValue();
+	                    $('#dlg').dialog('close');
+	                    $('#dg').datagrid('reload');
+	                } else{
+	                	$.messager.alert("系统提示",res.errorMsg);
+	                }	                    	               					
+				}
+			});
+		}
+		//删除选中的用户数据
+		function deleteUser(){
+			//获得选中数据对象
+			var selectedRows=$("#dg").datagrid('getSelections');
+			if(selectedRows.length==0){
+				$.messager.alert("系统提示","请选择要删除的数据！");
+				return;
+			}
+			var strIds=[];//要删除的序号组合
+			for(var i=0;i<selectedRows.length;i++){
+				strIds.push(selectedRows[i].id);
+			}
+			var ids=strIds.join(",");
+			$.messager.confirm("系统提示","您确认要删掉这<font color=red>"+selectedRows.length+"</font>条数据吗？",function(r){
+				if(r){
+					//ajax提交 delIds
+					$.post("${pageContext.request.contextPath}/user/userDelete.do",{delIds:ids},function(result){
+						if(result.success){
+							$.messager.alert("系统提示","您已成功删除<font color=red>"+result.delNums+"</font>条数据！");
+							$("#dg").datagrid("reload");
+						}else{
+							$.messager.alert('系统提示',"数据删除失败！");
+						}
+					},"json");
+				}
+			});
+		}
+		//修改用户资料
+		function openUserModifyDialog(){
+			var selectedRows=$("#dg").datagrid('getSelections');
+			if(selectedRows.length!=1){
+				$.messager.alert("系统提示","请选择一条要编辑的数据！");
+				return;
+			}
+			var row=selectedRows[0];
+			$("#dlg").dialog("open").dialog("setTitle","编辑用户信息");
+			$("#loginid").val(row.loginid);
+			$("#name").val(row.name);
+			$("#phone").val(row.phone);
+			$("#planid").val(row.planid);
+			$("#plan").val(row.plan);
+			$("#note").val(row.note);
+			url="${pageContext.request.contextPath}/user/userSave.do?id=" + row.id;
+		}
+		//查询符合条件的用户
+		function searchUser(){
+			$('#dg').datagrid('load',{
+				name:$('#username').val(),
+				phone:$('#userphone').val(),
+			});
+		}
+		
 		function exportUser2(){
 			window.open('${pageContext.request.contextPath}/user/exportExcel.do');
 		}
@@ -51,38 +142,92 @@
 		
 	</script>
 </head>
-<body>
-	<div region="north" style="height: 55px;background-color: #E0EDFF">
-		<div style="padding-top: 30px;padding-right: 20px; float:right">当前用户：&nbsp;<font color="red" >${currentStaff.staffName}</font><a href="${pageContext.request.contextPath}/index.jsp" style="margin-left:20px;text-decoration:none">注销登录</a></div>
+<body class="easyui-layout">
+	<div region="north" style="height: 70px; background-color: #ffffff">
+		<div align="left" style="float: left; height:65px; "><img src="../images/title.png"></div>
+		<div style="padding-top: 40px;padding-right: 20px; float:right">当前用户：&nbsp;<font color="red" >${currentStaff.staffName}</font><a href="${pageContext.request.contextPath}/index.jsp" style="margin-left:20px;text-decoration:none">注销登录</a></div>
 	</div>
-
-	<table id="dg" title="用户管理" class="easyui-datagrid" 
-            url="${pageContext.request.contextPath}/user/userList.do"
-            toolbar="#toolbar" pagination="true"
-            rownumbers="true" fitColumns="true" singleSelect="true">
-        <thead>
-            <tr>
-            	<th field="id" width="50" hidden="true">编号</th>
-            	<th field="loginid" width="15" >员工账号</th>
-                <th field="name" width="15">客户姓名</th>
-                <th field="phone" width="20">电话号码</th>
-                <th field="planid" width="20">产品id</th>
-                <th field="plan" width="30">推荐产品</th>
-                <th field="note" width="50">备注</th>
-            </tr>
-        </thead>
-    </table>
-    <div id="toolbar">
-	    <table>
-		    <tr>		    
-				<td><form id="uploadForm" action="${pageContext.request.contextPath}/user/uploadExcel.do" method="post" enctype="multipart/form-data">					
+	<div region="center">
+		<table id="dg" title="产品推荐" class="easyui-datagrid" 
+	            url="${pageContext.request.contextPath}/user/userList.do"
+	            toolbar="#toolbar" pagination="true"
+	            rownumbers="true" fitColumns="true" singleSelect="false" nowrap="false" word-wrap="break-word"
+	            fitColumns="true" fit="true" >
+	        <thead>
+	            <tr>
+	            	<th field="cb" checkbox="true"></th>
+	            	<th field="id" width="50" hidden="true">编号</th>
+	            	<th field="loginid" width="15" >员工账号</th>
+	                <th field="name" width="15">客户姓名</th>
+	                <th field="phone" width="20">电话号码</th>
+	                <th field="planid" width="20">产品id</th>
+	                <th field="plan" width="30">推荐产品</th>
+	                <th field="note" width="50" >备注</th>
+	            </tr>
+	        </thead>
+	    </table>
+	    <div id="toolbar">
+		    <div>
+		    <form id="uploadForm" action="${pageContext.request.contextPath}/user/uploadExcel.do" method="post" enctype="multipart/form-data">
+		    	<a href="javascript:openUserAddDialog()" class="easyui-linkbutton" iconCls="icon-add" plain="true">添加</a>
+				<a href="javascript:openUserModifyDialog()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">修改</a>
+				<a href="javascript:deleteUser()" class="easyui-linkbutton" iconCls="icon-remove" plain="true">移除</a>
+		    			 			    		    											
 					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-import" plain="true" onclick="uploadFile()">上传excel文件</a>
-					<input type="file" id="uploadFile" name="userUploadFile">
-				</form></td>
-		        <td><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-export" plain="true" onclick="exportUser2()">导出excel文件</a></td>
-		        <td><a href="javascript:void(0)" class="easyui-linkbutton"  iconCls="icon-import" plain="true" onclick="downloadTemplate()">下载excel模版</a></td>
-		    </tr>
-	    </table>             
+					<input type="file" id="uploadFile" name="userUploadFile">				
+			    			   
+		    	
+		    	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-export" plain="true" onclick="exportUser2()">导出excel文件</a>
+			    	<a href="javascript:void(0)" class="easyui-linkbutton"  iconCls="icon-import" plain="true" onclick="downloadTemplate()">下载excel模版</a>
+		    </form>
+		    </div> 
+			<div>
+				<label>客户姓名</label> 
+	            <input id="username" class="easyui-textbox" label="Search:" labelPosition="left">&nbsp;
+	            <label>手机号码</label>
+	            <input id="userphone" class="easyui-textbox" label="Search:" labelPosition="left">&nbsp;		   
+				<a href="javascript:searchUser()" class="easyui-linkbutton" iconCls="icon-search" plain="true">搜索</a>
+			</div>            
+	    </div>
+	    
+	    <div id="dlg" class="easyui-dialog" style="width:280px;height:350px;padding:10px 20px"
+            closed="true" buttons="#dlg-buttons">
+	        <form id="fm" method="post">
+	            <div style="height:35px">
+	                <label>员工账号:</label>
+	                <input value="${user.loginid }" name="loginid" id="loginid" class="easyui-validatebox" required="true">
+	            </div>	           
+	            <div style="height:35px">
+	                <label>客户姓名:</label>
+	                <input value="${user.name }" name="name" id="name" class="easyui-validatebox" required="true">
+	            </div>
+	            <div style="height:35px">
+	                <label>电话号码:</label>
+	                <input value="${user.phone }" name="phone" id="phone" class="easyui-validatebox" required="true">
+	            </div>
+	            <div style="height:35px">
+	                <label>产&nbsp;品&nbsp;id&nbsp;:</label>
+	                <input value="${user.planid }" name="planid" id="planid" class="easyui-validatebox" required="true">
+	            </div>
+	            <div style="height:35px">
+	                <label>推荐产品:</label>
+	                <input value="${user.plan }" name="plan" id="plan" class="easyui-validatebox" required="true">
+	            </div>
+	            <div style="height:35px">
+	                <label>备注:</label>
+	                <div>
+	                	<textarea rows="2" cols="25" value="${user.note }" name="note" id="note"></textarea>
+	                </div>
+	                
+	            </div>
+	        </form>
+    	</div>
+    	
+    	<div id="dlg-buttons">
+			<a href="javascript:saveUser()" class="easyui-linkbutton" iconCls="icon-ok">保存</a>
+			<a href="javascript:closeUserDialog()" class="easyui-linkbutton" iconCls="icon-cancel">关闭</a>
+		</div>
+    	   	
     </div>
 	      
 </body>

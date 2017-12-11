@@ -24,8 +24,25 @@ public class UserServiceImpl implements Userservice{
     }
     	
      
-    public void addUser(User user){
-    	userDao.addUser(user);
+    public int addUser(User user){
+    	return userDao.addUser(user);
     }
        
+    public int updateUser(User user){
+    	return userDao.updateUser(user);
+    }
+    
+    public int deleteUserById(int id){
+    	return userDao.deleteUserById(id);
+    }
+
+	
+	public List<User> getAllUsers(int page, int rows, String name, String phone) {
+		return userDao.getAllUsers(page, rows, "%"+name+"%", "%"+phone+"%");
+	}
+
+	
+	public int getCount(String name, String phone) {		
+		return userDao.getCount("%"+name+"%", "%"+phone+"%");
+	}
 }

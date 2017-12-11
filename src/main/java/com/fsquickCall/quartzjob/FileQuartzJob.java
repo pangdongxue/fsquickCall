@@ -45,7 +45,7 @@ public class FileQuartzJob {
     	for (int i = 0; i < fileList.length; i++) {
     	   if (fileList[i].isFile()) {  		   
     		    POIFSFileSystem fs=new POIFSFileSystem(new FileInputStream(fileList[i]));	
-    	    	System.out.println("wodepipeifangan");  
+    	    	//System.out.println("wodepipeifangan");  
     			HSSFWorkbook wb=new HSSFWorkbook(fs);
     			HSSFSheet hssfSheet=wb.getSheetAt(0);  // 获取第一个Sheet页
     			if(hssfSheet!=null){
@@ -61,12 +61,7 @@ public class FileQuartzJob {
     					user.setPlan(ExcelUtil.formatCell(hssfRow.getCell(4)));
     					user.setNote(ExcelUtil.formatCell(hssfRow.getCell(5)));
     		
-    					//ECOP30007
-    					Result orderCheckResult = ECOPUtils.getEcopService().newCheckOrderInfor("", systemId, userName, password, "", "1", user.getPhone(), "0", user.getPlanid(), "0");
-    					Map<String, Object> map2 = ECOPUtils.UnPackageXml(orderCheckResult.getMessage());
-    					if (map2.get("msgheader.retinfo.retcode") != "0") {
-    						user.setNote(map2.get("msgheader.retinfo.retmsg").toString());						
-    					}    					
+    					PlanValidate.validate(user);
     					userservice.addUser(user);			
     				}
     			}   		   

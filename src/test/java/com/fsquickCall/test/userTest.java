@@ -18,7 +18,7 @@ import com.fsquickCall.service.Userservice;
 
 @SuppressWarnings("deprecation")
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:fsquickCall-applicationContext.xml","classpath:fsquickCall-mybatis.xml"})
+@ContextConfiguration(locations = {"classpath:fsquickCall-springMVC.xml","classpath:fsquickCall-applicationContext.xml"})
 @Transactional        
 @TransactionConfiguration(transactionManager = "transactionManager", defaultRollback = true)
 
@@ -41,14 +41,51 @@ public class userTest {
 	//@Rollback(true)
 	public void userAdd(){
 		User user = new User();
+		user.setId(1);
+		user.setLoginid("pangdongxue");
 		user.setName("pangdongxue");
 	    user.setPhone("18716318198");
+	    user.setPlanid("1234567");
 	    user.setPlan("4G飞享套餐");
 	    user.setNote("成功了");
 	    userservice.addUser(user);
 	    
 	    List<User> userslist = userservice.usersList();
 	    logger.info(JSON.toJSONStringWithDateFormat(userslist, ""));
+	    
 	}
+	
+	@Test
+	public void userUpdate(){
+		User user = new User();
+		user.setId(2);
+		user.setLoginid("pangdongxue");
+		user.setName("pangdongxue");
+	    user.setPhone("18716318198");
+	    user.setPlanid("1234567");
+	    user.setPlan("4G飞享套餐");
+	    user.setNote("成功了");
+	    int i = userservice.updateUser(user);
+	    
+	    logger.info("更新成功了:" + i);
+	}
+	
+	@Test
+	public void userDelete(){		
+	    int i = userservice.deleteUserById(1);	    
+	    logger.info("删除成功了:" + i);
+	}
+	
+	@Test
+    public void getCountTest(){
+		int i = userservice.getCount(" ", " ");
+		logger.info("用户数量为:" + i);
+    }
+
+    @Test
+    public void getUserTest(){       
+        List<User> users=userservice.getAllUsers(0, 10, " ", " ");
+        logger.info(JSON.toJSONStringWithDateFormat(users, ""));
+    }
 	
 }

@@ -23,12 +23,31 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="usersListByPage"  resultMap="resultListUser" parameterType="java.util.Map">  
         select * from t_user limit #{0},#{1}  
     </select>  
+    
+    <!-- 用户总数 + 账号和名称匹配 -->
+    <select id="getCount" resultType="int">  
+        select count(*) from t_user where name like #{0} and phone like #{1}
+    </select> 
+    <!-- 查询用户 + 分页 + 按账号和名称匹配 -->
+    <select id="getAllUsers" resultMap="resultListUser">  
+        select * from t_user where name like #{2} and phone like #{3} limit #{0},#{1}
+    </select>
           
     <insert id="addUser" parameterType="User" useGeneratedKeys="true"   
         keyProperty="id">  
         insert into t_user(loginid,name,phone,planid,plan,note)  
             values(#{loginid},#{name},#{phone},#{planid},#{plan},#{note})      
     </insert>  
+    
+    <!-- 更新用户 -->
+    <update id="updateUser" parameterType="User">
+        update t_user set loginid=#{loginid},name=#{name},phone=#{phone},planid=#{planid},plan=#{plan},note=#{note} where id=#{id}
+    </update>
+   
+    <!--删除用户 -->
+    <delete id="deleteUserById" parameterType="int">
+         delete from t_user where id=#{id}
+    </delete>
               
 	
 </mapper> 
